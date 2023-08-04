@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from ortei import __version__
 
 with open("README.md", 'r', encoding='utf-8') as f:
     readme = f.read()
@@ -8,7 +9,7 @@ with open("requirements.txt", 'r', encoding='utf-8') as f:
 
 setup(
     name='ortei',
-    version='0.1.0',
+    version=__version__,
     description='ONNX-Runtime-Engine-Interface',
     long_description=readme,
     author='404Vector',
