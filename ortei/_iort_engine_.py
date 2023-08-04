@@ -60,6 +60,12 @@ class IORTEngine(metaclass=abc.ABCMeta):
 
     This is a dictionary of io buffers handled in the device memory area.
     
+        Example ::
+
+        io_data_cpu = self.io_data_cpu
+        device_name = self.device_name
+        device_id = self.device_name
+        self.io_data_ort = {key:ort.OrtValue.ortvalue_from_numpy(io_data_cpu[key], device_name, device_id) for key in io_data_cpu}
     """
     device_name:str
     """
@@ -86,10 +92,20 @@ class IORTEngine(metaclass=abc.ABCMeta):
     Result data output by the model.
     """
 
-    def __init__(self):
-        self._init_members()
-        for key in self.__dict__.keys():
-            assert self.__dict__[key], f"ERROR, self.{key} is None."
+    def __init__(self, **argv):
+        self._init_members(**argv)
+        member_check_list = [
+            self.ort_session,
+            self.io_shape,
+            self.io_binding,
+            self.io_data_cpu,
+            self.io_data_ort,
+            self.device_name,
+            self.input_data,
+            self.output_data,
+        ]
+        for member_value in member_check_list:
+            assert member_value is not None, f"ERROR, {member_value} is None."
 
     @abc.abstractmethod
     def _init_members(self) -> None:
