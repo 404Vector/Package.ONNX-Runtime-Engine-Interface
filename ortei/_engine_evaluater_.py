@@ -6,17 +6,15 @@ from datetime import datetime
 from pytz import timezone
 from tqdm import tqdm
 import time
-import cv2
 
 class EngineEvaluator:
-    def __init__(self, engine:IORTEngine, dataset:Any, result_image_path:str) -> None:
+    def __init__(self, engine:IORTEngine, dataset:Any) -> None:
         try:
             _ = iter(dataset)
         except TypeError as te:
             print(dataset, 'is not iterable')
         self.engine = engine
         self.dataset = dataset
-        self.result_image_path = result_image_path
         self.process_log = self.create_process_log()
 
     def create_process_log(self):
@@ -51,7 +49,6 @@ class EngineEvaluator:
         # init
         dataset = self.dataset
         engine = self.engine
-        result_image_path = self.result_image_path
         self.process_log = self.create_process_log()
         process_log = self.process_log
         process_log["start_time"] = datetime.now(timezone('Asia/Seoul')).strftime("%Y-%m-%d-%H-%M-%S")
@@ -62,12 +59,12 @@ class EngineEvaluator:
             log = {}
             _key_ = "load_data"
             log[_key_] = time.time()
-            data = dataset[idx]
+            loaded_data = dataset[idx]
             log[_key_] = time.time() - log[_key_]
 
             _key_ = "set_input_data"
             log[_key_] = time.time()
-            engine.set_input_data(data=data['image_raw'])
+            engine.set_input_data(data=loaded_data)
             log[_key_] = time.time() - log[_key_]
 
             _key_ = "convert_data2input"
@@ -102,8 +99,9 @@ class EngineEvaluator:
 
             _key_ = "save_data"
             log[_key_] = time.time()
-            os.makedirs(result_image_path, exist_ok=True)
-            cv2.imwrite(result_image_path.format(name=f"{idx:08d}.bmp"), result_images[0])
+            # TODO!!
+            # os.makedirs(result_image_path, exist_ok=True)
+            # cv2.imwrite(result_image_path.format(name=f"{idx:08d}.bmp"), result_images[0])
             log[_key_] = time.time() - log[_key_]
             process_log["iter_logs"].append(log)
         process_end = time.time()
