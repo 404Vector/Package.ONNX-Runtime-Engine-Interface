@@ -5,7 +5,7 @@ with open("README.md", 'r', encoding='utf-8') as f:
     readme = f.read()
 
 with open("requirements.txt", 'r', encoding='utf-8') as f:
-    requires = f.read()
+    requires = f.read().split('\n')
 
 setup(
     name='ortei',
