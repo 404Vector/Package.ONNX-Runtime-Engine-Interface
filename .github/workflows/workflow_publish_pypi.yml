@@ -31,10 +31,6 @@ jobs:
     - name: Update version in setup.py
       run: >-
         sed -i "s/{{VERSION_PLACEHOLDER}}/${{ steps.tag.outputs.TAG_NAME }}/g" setup.py
-    - name: Update PIP and install requirements
-      run: |
-        python3 -m pip install --upgrade pip
-        python3 -m pip install -r requirements.txt
     - name: Build a binary wheel and a source tarball
       run: >-
         python3 -m
