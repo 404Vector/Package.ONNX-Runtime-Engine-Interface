@@ -16,7 +16,7 @@ setup(
     author_email='tiryul@gmail.com',
     url='https://github.com/404Vector/Package.ONNX-Runtime-Engine-Interface/tree/main',
     packages=find_packages(exclude=[]),
-    install_requires=requires,
+    install_requires=["pandas", "pytz", "tqdm"],
     keywords=['404Vector', 'ortei', ],
     python_requires='>=3.8',
     package_data={},
