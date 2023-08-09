@@ -6,16 +6,43 @@ on:
      - '*'
 
 jobs:
-  pypi-publish:
-    name: Upload release to PyPI
+  build-n-publish:
+    name: Build and publish Python distributions to PyPI
     runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/ortei
-    permissions:
-      id-token: write  # IMPORTANT: this permission is mandatory for trusted publishing
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.8"]
     steps:
-    # retrieve your distributions here
-
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install pypa/build
+      run: >-
+        python3 -m
+        pip install
+        build
+    - name: Extract tag name
+      id: tag
+      run: echo ::set-output name=TAG_NAME::$(echo $GITHUB_REF | cut -d / -f 3)
+    - name: Update version in setup.py
+      run: >-
+        sed -i "s/{{VERSION_PLACEHOLDER}}/${{ steps.tag.outputs.TAG_NAME }}/g" setup.py
+    - name: Update PIP and install requirements
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install -r requirements.txt
+    - name: Build a binary wheel and a source tarball
+      run: >-
+        python3 -m
+        build
+        --sdist
+        --wheel
+        --outdir dist/
+        .
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
