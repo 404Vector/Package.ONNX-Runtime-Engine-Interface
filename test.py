@@ -44,12 +44,12 @@ class EvaluatorTests(unittest.TestCase):
         """테스트 시작되기 전 파일 작성"""
         self.engin = ExampleEngine()
         self.dataset = [i for i in range(100)]
-        self.evaluator = EngineEvaluator(self.engin, self.dataset)
-        self.csv_path = f"./temp_test_run_and_save_result.csv"
+        self.evaluator = EngineEvaluator(self.engin)
+        self.test_result_path = f"./temp_test_run_and_save_result.csv"
 
     def tearDown(self):
         """테스트 종료 후 파일 삭제 """
-        csv_path = self.csv_path
+        csv_path = self.test_result_path
         try:
             os.remove(csv_path)
             assert not os.path.exists(csv_path)
@@ -57,12 +57,14 @@ class EvaluatorTests(unittest.TestCase):
             print(ex)
     
     def test_run_and_save(self):
-        csv_path = self.csv_path
+        test_result_path = self.test_result_path
         evaluator = self.evaluator
+        dataset = self.dataset
 
-        evaluator.run()
-        evaluator.save_testdata(csv_path)
-        assert os.path.exists(csv_path)
+        evaluator.run(dataset)
+        evaluator.save_testdata(test_result_path)
+        assert os.path.exists(test_result_path)
+        os.system(f"cat {test_result_path}")
 
 # unittest를 실행
 if __name__ == '__main__':

@@ -1,61 +1,51 @@
-import os
-from typing import Any, Union
+from typing import Any, Optional, Union
 from ._iort_engine_ import IORTEngine
-import pandas as pd
 from datetime import datetime
-from pytz import timezone
-from tqdm import tqdm
 import time
+import json
 
 class EngineEvaluator:
-    def __init__(self, engine:IORTEngine, dataset:Any) -> None:
-        try:
-            _ = iter(dataset)
-        except TypeError as te:
-            print(dataset, 'is not iterable')
+    def __init__(self, engine:IORTEngine, time_zone_info:Optional[Any]=None) -> None:
         self.engine = engine
-        self.dataset = dataset
         self.process_log = self.create_process_log()
+        self.time_zone_info = time_zone_info
 
     def create_process_log(self):
         # init
-        dataset = self.dataset
-
         return {
             "start_time":"None",
             "iter_logs":[],
-            "number_of_epoch" : len(dataset),
+            "number_of_epoch" : 0,
         }
-
-    def save_testdata(self, result_csv_path:str, additional_info:Union[dict, None] = None):
+    
+    def save_testdata(self, result_test_data_path:str, additional_info:Union[dict, None] = None):
         #init
-        path:str = result_csv_path
+        path:str = result_test_data_path
         process_log:dict = self.process_log
         infos = {}
         
         infos.update(process_log)
         if additional_info:
             infos.update(additional_info)
-        keys = [k for k in infos]
-        keys.remove("iter_logs")
-        iter_logs = pd.DataFrame(infos["iter_logs"]).to_csv()
-        with open(path, 'w') as f:
-            for key in keys:
-                f.write(f"{key} : {infos[key]}\n")
-            for s in iter_logs:
-                f.write(s)
+        with open(path, 'w') as json_file:
+            json.dump(infos, json_file, indent=4)
 
-    def run(self):
+    def run(self, dataset:Any):
+        try:
+            _ = iter(dataset)
+        except TypeError as te:
+            print(dataset, 'is not iterable')
         # init
-        dataset = self.dataset
+        time_zone_info = self.time_zone_info
         engine = self.engine
         self.process_log = self.create_process_log()
         process_log = self.process_log
-        process_log["start_time"] = datetime.now(timezone('Asia/Seoul')).strftime("%Y-%m-%d-%H-%M-%S")
+        process_log["number_of_epoch"] = len(dataset)
+        process_log["start_time"] = datetime.now(time_zone_info).strftime("%Y-%m-%d-%H-%M-%S")
 
         # run
         process_start = time.time()
-        for idx in tqdm(range(len(dataset))):
+        for idx in range(len(dataset)):
             log = {}
             _key_ = "load_data"
             log[_key_] = time.time()
@@ -106,4 +96,4 @@ class EngineEvaluator:
             process_log["iter_logs"].append(log)
         process_end = time.time()
         process_log["processing_time"] = process_end - process_start
-        process_log["end_time"] = datetime.now(timezone('Asia/Seoul')).strftime("%Y-%m-%d-%H-%M-%S")
+        process_log["end_time"] = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
